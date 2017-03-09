@@ -5,6 +5,7 @@
   numpy<br />
   scipy<br />
   _thread<br />
+  matplotlib<br />
 ## Functions and keywords
 ### Functions 功能
 Send training information to wechat every epoch(auto)  
