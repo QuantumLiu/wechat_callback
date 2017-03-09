@@ -89,7 +89,7 @@ class sendmessage(Callback):
         #transform a string to a validate filename
         #将字符串转化为合法文件名
         rstr = r"[\/\\\:\*\?\"\<\>\|]"  # '/\:*?"<>|'
-        new_title = re.sub(rstr, "", title)
+        new_title = re.sub(rstr, "", title).replace(' ','')
         return new_title
 #==============================================================================
 #         
@@ -257,7 +257,8 @@ class sendmessage(Callback):
                     else:
                         save=True
                         filepath=(self.GetMiddleStr(text,'[',']')+'.h5' if self.GetMiddleStr(text,'[',']') else self.validateTitle(self.localtime)+'.h5')
-                    sec=(int(self.GetMiddleStr(text,'{','}')) if int(self.GetMiddleStr(text,'{','}'))>30 else 120)
+                    print('\n',filepath,'\n')
+                    sec=int((self.GetMiddleStr(text,'{','}') if self.GetMiddleStr(text,'{','}')>'30' else 120))
                     self.shutdown(sec,save=save,filepath=filepath)
 #==============================================================================
 #                     
@@ -284,7 +285,6 @@ class sendmessage(Callback):
                         itchat.send("Got no level,using default 'all'", toUserName='filehelper')
                         _thread.start_new_thread(self.get_fig,())
                 if any((k in text) for k in gpu_cmdlist):
-                    print('\ngpuzzzzzzzzzzzzzzzzzzzzz\n')
                     sp_type_lsit=(self.GetMiddleStr(text,'[',']').split() if self.GetMiddleStr(text,'[',']').split() else ['MEMORY'])
                     av_type_list=[val for val in sp_type_lsit if val in type_list]
                     self.gpu_status(av_type_list,)
