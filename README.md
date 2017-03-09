@@ -1,4 +1,5 @@
-# wechat_callback
+# wechat_callback<br />
+可移步知乎专栏查看详情https://zhuanlan.zhihu.com/p/25670072
 ## Requirement
   itchat<br />
   keras<br />
