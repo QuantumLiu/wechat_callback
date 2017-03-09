@@ -11,7 +11,7 @@ import wechat_utils #will login automaticly
 #wechat_utils.sendmessage()isthe callback class
 #wechat_utils.sendmessage()是keras的回调类，fit时传入callbacklist
 
-nb_sample=64*400
+nb_sample=64*10000
 batch_size=64
 dim=784
 

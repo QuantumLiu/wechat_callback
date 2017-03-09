@@ -14,6 +14,7 @@ import matplotlib
 from math import ceil
 from itchat.content import TEXT
 import _thread
+import os
 from os import system
 import re
 import traceback  
@@ -29,7 +30,7 @@ matplotlib.use('Agg') #
 # Automaticly login when imported 
 #在被import时自动登录
 #==============================================================================
-itchat.auto_login(enableCmdQR=True,hotReload=True)
+itchat.auto_login(enableCmdQR=0.5,hotReload=True)
 itchat.dump_login_status()#dump
 #==============================================================================
 # 
@@ -120,6 +121,7 @@ class sendmessage(Callback):
             plt.savefig(filename)
             plt.close('all')
             itchat.send_image(filename,toUserName='filehelper')
+            time.sleep(.5)
             itchat.send('Sending batches figure',toUserName='filehelper')
 #==============================================================================
 #             
@@ -143,6 +145,7 @@ class sendmessage(Callback):
             plt.savefig(filename)
             plt.close('all')
             itchat.send_image(filename,toUserName='filehelper')
+            time.sleep(.5)
             itchat.send('Sending epochs figure',toUserName='filehelper')
 #==============================================================================
 #             
@@ -173,7 +176,23 @@ class sendmessage(Callback):
             itchat.send('Failed to send figure',toUserName='filehelper')
             _thread.exit()
             return
-        
+#==============================================================================
+#             
+#==============================================================================
+    def gpu_status(self,av_type_list):
+        for t in av_type_list:
+            cmd='nvidia-smi -q --display='+t
+            print('\nCMD:',cmd,'\n')
+            r=os.popen(cmd)
+            info=r.readlines()
+            r.close()
+            content = " ".join(info)
+            print('\ncontent:',content,'\n')
+            index=content.find('Attached GPUs')
+            s=content[index:].replace(' ','').rstrip('\n')
+            itchat.send(s, toUserName='filehelper')
+            time.sleep(.5)
+        #_thread.exit()
 #==============================================================================
 # 
 #==============================================================================
@@ -204,6 +223,8 @@ class sendmessage(Callback):
             get_fig_cmdlist=[u'获取图表','Show me the figure']
             #The keywords of getting figure,similair to stop_training_cmdlist
             #获取图表关键词列表，和stop_training_cmdlist类似
+            gpu_cmdlist=['GPU','gpu',u'显卡']
+            type_list=['MEMORY', 'UTILIZATION', 'ECC', 'TEMPERATURE', 'POWER', 'CLOCK', 'COMPUTE', 'PIDS', 'PERFORMANCE', 'SUPPORTED_CLOCKS,PAGE_RETIREMENT', 'ACCOUNTING']
             print('\n',text,'\n')
             if msg['ToUserName']=='filehelper':
                 if 'Stop at' in text:
@@ -262,7 +283,11 @@ class sendmessage(Callback):
                         print("Got no level,using default 'all'")
                         itchat.send("Got no level,using default 'all'", toUserName='filehelper')
                         _thread.start_new_thread(self.get_fig,())
-                    
+                if any((k in text) for k in gpu_cmdlist):
+                    print('\ngpuzzzzzzzzzzzzzzzzzzzzz\n')
+                    sp_type_lsit=(self.GetMiddleStr(text,'[',']').split() if self.GetMiddleStr(text,'[',']').split() else ['MEMORY'])
+                    av_type_list=[val for val in sp_type_lsit if val in type_list]
+                    self.gpu_status(av_type_list,)
         _thread.start_new_thread(itchat.run, ())
 #==============================================================================
 #     
