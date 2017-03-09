@@ -35,7 +35,9 @@ Specify a stop epoch
 Stop now manualy  
 
 立刻停止训练(当前epoch结束后)  
-<br />
+<br /><br />
+New：Get gpu status<br />
+新增：获取GPU状态<br />
 ### Keywords/commands 关键词和命令
 stop_training_cmdlist=['Stop now',"That's enough",u'停止训练',u'放弃治疗']  
 
@@ -70,8 +72,10 @@ specify stop epoch:
 keywords:'Stop at + epoch'  
 
 指定训练停止轮数  
-<br />  
-  
+<br /><br />
+gpu_cmdlist=['GPU','gpu',u'显卡']<br />
+type_list=['MEMORY', 'UTILIZATION', 'ECC', 'TEMPERATURE', 'POWER', 'CLOCK', 'COMPUTE', 'PIDS', 'PERFORMANCE', 'SUPPORTED_CLOCKS,PAGE_RETIREMENT', 'ACCOUNTING']<br />显卡关键词
+  以及可查询状态列表<br /><br />
 ## Examples
 specify stop epoch  
 
@@ -94,4 +98,4 @@ example:send:'Show me the figure [loss]{batches}' from phone,you will recive a j
 send:'Show me the figure'，you will recive two jpg images of all metrics in batches and epochs<br />
 获取图表，通过[metrics]和{level}指定参数，如果没有指定则皆默认为’all'<br />
 例如，手机发送"获取图表[loss]{batches}",会收到一个jpg格式的loss随batches变化的图片<br />
-手机发送"获取图表",则会得到两张图片，分别是所有指标随batch和epoch的变化<br />
+手机发送"获取图表",则会得到两张图片，分别是所有指标随batch和epoch的变化<br /><br />获取gpu状态<br />发送'gpu[MEMORY]'或者'GPU[MEMORY TEMPERATURE]'或者'显卡[MEMORY]'<br />
