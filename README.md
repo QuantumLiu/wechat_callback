@@ -80,7 +80,7 @@ specify stop epoch
 Example:send:'Stop at:8' from your phone,and then training will be stopped after epoch8<br />
 例如：手机发送“Stop at：8”，训练将在epoch8完成后停止<br /><br />
 Stop training after current epoch finished<br />
-当前epoch完成后停止训练<br /><br />
+当前epoch完成后停止训练<br />
 example：send:'Stop now' or send:'停止训练' from your phone,and then training will be stopped after current epoch<br />
 例如：手机发送“停止训练”或者“Stop now”，训练将会在当前epoch完成后被停止<br /><br />
 Shutting down the computer after specified sec，specify waiting seconds and saved model filename by {sec} and [name](without .h5)<br />
