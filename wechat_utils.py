@@ -235,7 +235,7 @@ class sendmessage(Callback):
                         save=False
                     else:
                         save=True
-                        filepath=(self.GetMiddleStr(text,'[',']')+'.h5' if self.GetMiddleStr(text,'[',']') else self.localtime+'.h5')
+                        filepath=(self.GetMiddleStr(text,'[',']')+'.h5' if self.GetMiddleStr(text,'[',']') else self.validateTitle(self.localtime)+'.h5')
                     sec=(int(self.GetMiddleStr(text,'{','}')) if int(self.GetMiddleStr(text,'{','}'))>30 else 120)
                     self.shutdown(sec,save=save,filepath=filepath)
 #==============================================================================
@@ -297,8 +297,8 @@ class sendmessage(Callback):
             self.model.stop_training = True
         logs = logs or {}
         self.epoch.append(epoch)
-        sio.savemat('logs_batches'+self.localtime+'.mat',{'log':np.array(self.logs_batches)})
-        sio.savemat('logs_epochs'+self.localtime+'.mat',{'log':np.array(self.logs_epochs)})
+        sio.savemat('logs_batches'+self.validateTitle(self.localtime)+'.mat',{'log':np.array(self.logs_batches)})
+        sio.savemat('logs_epochs'+self.validateTitle(self.localtime)+'.mat',{'log':np.array(self.logs_epochs)})
         _thread.start_new_thread(self.get_fig,())
 #==============================================================================
 #         
