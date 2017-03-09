@@ -84,9 +84,9 @@ Stop training after current epoch finished<br />
 example：send:'Stop now' or send:'停止训练' from your phone,and then training will be stopped after current epoch<br />
 例如：手机发送“停止训练”或者“Stop now”，训练将会在当前epoch完成后被停止<br /><br />
 Shutting down the computer after specified sec，specify waiting seconds and saved model filename by {sec} and [name](without .h5)<br />
-在指定秒数后关机，用{sec}和[name]指定等待时间和保存文件名,文件名不包括.h5<br /><br />
+在指定秒数后关机，用{sec}和[name]指定等待时间和保存文件名,文件名不包括.h5<br />
 example:send:'Shut down now [test]{120}' from phone,the computer will be shut down after 120s,and save the model as test.h5<br />
-or send:'Shut down now{120},don't save',then the model won't be saved.<br />
+or send:'Shut down now{120},don't save',then the model won't be saved.<br /><br />
 Cancel shutting down the computer<br />
 example：send:'取消关机' or 'cancel' from phone<br /><br />
 Get figure of train infomation,specify metrics and level you want to show by[metrics]and{level},defualt are both 'all'<br />
