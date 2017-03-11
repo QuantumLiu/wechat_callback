@@ -19,6 +19,7 @@ from os import system
 import re
 import traceback
 import socket  
+import platform
 from requests.exceptions import ConnectionError
 matplotlib.use('Agg') # 
 #==============================================================================
@@ -49,9 +50,9 @@ class sendmessage(Callback):
     #keras.callbacks.Callback class的子类
     def t_send(self,msg,toUserName='filehelper'):
         try:
-            itchat.send(msg=msg,toUserName=toUserName)
+            itchat.send_msg(msg=msg,toUserName=toUserName)
             return
-        except (ConnectionError,NotImplementedError):
+        except (ConnectionError,NotImplementedError,KeyError):
             traceback.print_exc()
             print('\nConection error,failed to send the message!\n')
             return
@@ -61,7 +62,7 @@ class sendmessage(Callback):
         try:
             itchat.send_image(filename,toUserName=toUserName)
             return
-        except (ConnectionError,NotImplementedError):
+        except (ConnectionError,NotImplementedError,KeyError):
             traceback.print_exc()
             print('\nConection error,failed to send the figure!\n')
             return
@@ -83,7 +84,11 @@ class sendmessage(Callback):
             self.t_send('Command accepted,the model has already been saved,shutting down the computer....', toUserName='filehelper')
         else:
             self.t_send('Command accepted,shutting down the computer....', toUserName='filehelper')
-        _thread.start_new_thread(system, ('shutdown -s -t %d' %sec,))
+        if 'Windows' in platform.system():
+            _thread.start_new_thread(system, ('shutdown -s -t %d' %sec,))
+        else:
+            _thread.start_new_thread(system, ('shutdown -h -t %d' %sec,))
+            
 #==============================================================================
 #         
 #==============================================================================
@@ -91,7 +96,10 @@ class sendmessage(Callback):
         #Cancel function to cancel shutting down the computer
         #取消关机函数
         self.t_send('Command accepted,cancel shutting down the computer....', toUserName='filehelper')
-        _thread.start_new_thread(system, ('shutdown -a',))
+        if 'Windows' in platform.system():
+            _thread.start_new_thread(system, ('shutdown -a',))
+        else:
+            _thread.start_new_thread(system, ('shutdown -c',))
 #==============================================================================
 #         
 #==============================================================================
