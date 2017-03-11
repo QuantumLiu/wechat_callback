@@ -227,8 +227,8 @@ class sendmessage(Callback):
             #获取图表关键词列表，和stop_training_cmdlist类似
             gpu_cmdlist=['GPU','gpu',u'显卡']
             type_list=['MEMORY', 'UTILIZATION', 'ECC', 'TEMPERATURE', 'POWER', 'CLOCK', 'COMPUTE', 'PIDS', 'PERFORMANCE', 'SUPPORTED_CLOCKS,PAGE_RETIREMENT', 'ACCOUNTING']
-            print('\n',text,'\n')
             if msg['ToUserName']=='filehelper':
+                print('\n',text,'\n')
                 if 'Stop at' in text:
                     # Specify stop epoch，training will be stop after that epoch
                     #指定停止轮数，训练在指定epoch完成后会停止
