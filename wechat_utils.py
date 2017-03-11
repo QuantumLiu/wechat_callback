@@ -116,8 +116,9 @@ class sendmessage(Callback):
                 p.set_title(k+' in batches',fontsize=14)
                 p.set_xlabel('batch',fontsize=10)
                 p.set_ylabel(k,fontsize=10)
-                p.legend()
+                #p.legend()
             filename=self.validateTitle(self.localtime)+'batches.jpg'
+            plt.tight_layout()
             plt.savefig(filename)
             plt.close('all')
             itchat.send_image(filename,toUserName='filehelper')
@@ -140,8 +141,9 @@ class sendmessage(Callback):
                 p.set_title(k+' in epochs',fontsize=14)
                 p.set_xlabel('epoch',fontsize=10)
                 p.set_ylabel(k,fontsize=10)
-                p.legend()
+                #p.legend()
             filename=self.validateTitle(self.localtime)+'epochs.jpg'
+            plt.tight_layout()
             plt.savefig(filename)
             plt.close('all')
             itchat.send_image(filename,toUserName='filehelper')
