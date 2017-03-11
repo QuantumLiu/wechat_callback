@@ -17,7 +17,9 @@ import _thread
 import os
 from os import system
 import re
-import traceback  
+import traceback
+import socket  
+from requests.exceptions import ConnectionError
 matplotlib.use('Agg') # 
 #==============================================================================
 # def login():
@@ -45,6 +47,28 @@ def send(text):
 class sendmessage(Callback):
     #A subclss of keras.callbacks.Callback class
     #keras.callbacks.Callback class的子类
+    def t_send(self,msg,toUserName='filehelper'):
+        try:
+            itchat.send(msg=msg,toUserName=toUserName)
+            return
+        except (ConnectionError,NotImplementedError):
+            traceback.print_exc()
+            print('\nConection error,failed to send the message!\n')
+            return
+        else:
+            return
+    def t_send_img(self,filename,toUserName='filehelper'):
+        try:
+            itchat.send_image(filename,toUserName=toUserName)
+            return
+        except (ConnectionError,NotImplementedError):
+            traceback.print_exc()
+            print('\nConection error,failed to send the figure!\n')
+            return
+        else:
+            return
+       
+            
     def shutdown(self,sec,save=True,filepath='temp.h5'):
         #Function used to shut down the computer
         #sec:waitting time to shut down the computer,sencond
@@ -56,9 +80,9 @@ class sendmessage(Callback):
         #filepath:保存模型的文件名
         if save:
             self.model.save(filepath, overwrite=True)
-            itchat.send('Command accepted,the model has already been saved,shutting down the computer....', toUserName='filehelper')
+            self.t_send('Command accepted,the model has already been saved,shutting down the computer....', toUserName='filehelper')
         else:
-            itchat.send('Command accepted,shutting down the computer....', toUserName='filehelper')
+            self.t_send('Command accepted,shutting down the computer....', toUserName='filehelper')
         _thread.start_new_thread(system, ('shutdown -s -t %d' %sec,))
 #==============================================================================
 #         
@@ -66,7 +90,7 @@ class sendmessage(Callback):
     def cancel(self):
         #Cancel function to cancel shutting down the computer
         #取消关机函数
-        itchat.send('Command accepted,cancel shutting down the computer....', toUserName='filehelper')
+        self.t_send('Command accepted,cancel shutting down the computer....', toUserName='filehelper')
         _thread.start_new_thread(system, ('shutdown -a',))
 #==============================================================================
 #         
@@ -121,9 +145,18 @@ class sendmessage(Callback):
             plt.tight_layout()
             plt.savefig(filename)
             plt.close('all')
-            itchat.send_image(filename,toUserName='filehelper')
+#==============================================================================
+#             try:
+#                 itchat.send_image(filename,toUserName='filehelper')
+#             except (socket.gaierror,ConnectionError,NotImplementedError,TypeError,KeyError):
+#                 traceback.print_exc()
+#                 print('\nConection error!\n')
+#                 return
+#==============================================================================
+            self.t_send_img(filename,toUserName='filehelper')
             time.sleep(.5)
-            itchat.send('Sending batches figure',toUserName='filehelper')
+            self.t_send('Sending batches figure',toUserName='filehelper')
+            return
 #==============================================================================
 #             
 #==============================================================================
@@ -146,9 +179,18 @@ class sendmessage(Callback):
             plt.tight_layout()
             plt.savefig(filename)
             plt.close('all')
-            itchat.send_image(filename,toUserName='filehelper')
+#==============================================================================
+#             try:
+#                 itchat.send_image(filename,toUserName='filehelper')
+#             except (socket.gaierror,ConnectionError,NotImplementedError,TypeError,KeyError):
+#                 traceback.print_exc()
+#                 print('\nConection error!\n')
+#                 return
+#==============================================================================
+            self.t_send_img(filename,toUserName='filehelper')
             time.sleep(.5)
-            itchat.send('Sending epochs figure',toUserName='filehelper')
+            self.t_send('Sending epochs figure',toUserName='filehelper')
+            return
 #==============================================================================
 #             
 #==============================================================================
@@ -175,7 +217,7 @@ class sendmessage(Callback):
                 return
         except Exception:
             traceback.print_exc()
-            itchat.send('Failed to send figure',toUserName='filehelper')
+            self.t_send('Failed to send figure',toUserName='filehelper')
             _thread.exit()
             return
 #==============================================================================
@@ -184,15 +226,15 @@ class sendmessage(Callback):
     def gpu_status(self,av_type_list):
         for t in av_type_list:
             cmd='nvidia-smi -q --display='+t
-            print('\nCMD:',cmd,'\n')
+            #print('\nCMD:',cmd,'\n')
             r=os.popen(cmd)
             info=r.readlines()
             r.close()
             content = " ".join(info)
-            print('\ncontent:',content,'\n')
+            #print('\ncontent:',content,'\n')
             index=content.find('Attached GPUs')
             s=content[index:].replace(' ','').rstrip('\n')
-            itchat.send(s, toUserName='filehelper')
+            self.t_send(s, toUserName='filehelper')
             time.sleep(.5)
         #_thread.exit()
 #==============================================================================
@@ -204,7 +246,7 @@ class sendmessage(Callback):
         self.logs_epochs={}
         self.localtime = time.asctime( time.localtime(time.time()) )
         self.mesg = 'Train started at: '+self.localtime
-        itchat.send(self.mesg, toUserName='filehelper')
+        self.t_send(self.mesg, toUserName='filehelper')
         self.stopped_epoch = self.params['nb_epoch']
         @itchat.msg_register(TEXT)
 #==============================================================================
@@ -235,7 +277,7 @@ class sendmessage(Callback):
                     #Example:send:'Stop at:8' from your phone,and then training will be stopped after epoch8
                     #例如：手机发送“Stop at：8”，训练将在epoch8完成后停止
                     self.stopped_epoch = int(re.findall(r"\d+\.?\d*",text)[0])
-                    itchat.send('Command accepted,training will be stopped at epoch'+str(self.stopped_epoch), toUserName='filehelper')
+                    self.t_send('Command accepted,training will be stopped at epoch'+str(self.stopped_epoch), toUserName='filehelper')
 #==============================================================================
 #                 
 #==============================================================================
@@ -245,7 +287,7 @@ class sendmessage(Callback):
                     #example：send:'Stop now' or send:'停止训练' from your phone,and then training will be stopped after current epoch
                     #例如：手机发送“停止训练”或者“Stop now”，训练将会在当前epoch完成后被停止
                     self.model.stop_training = True
-                    itchat.send('Command accepted,stop training now at epoch'+str(self.epoch[-1]+1), toUserName='filehelper')
+                    self.t_send('Command accepted,stop training now at epoch'+str(self.epoch[-1]+1), toUserName='filehelper')
 #==============================================================================
 #                 
 #==============================================================================
@@ -283,8 +325,8 @@ class sendmessage(Callback):
                     if level in ['all','epochs','batches']:
                         _thread.start_new_thread(self.get_fig,(level,metrics))
                     else:
-                        print("Got no level,using default 'all'")
-                        itchat.send("Got no level,using default 'all'", toUserName='filehelper')
+                        print("\nGot no level,using default 'all'\n")
+                        self.t_send("Got no level,using default 'all'", toUserName='filehelper')
                         _thread.start_new_thread(self.get_fig,())
                 if any((k in text) for k in gpu_cmdlist):
                     sp_type_lsit=(self.GetMiddleStr(text,'[',']').split() if self.GetMiddleStr(text,'[',']').split() else ['MEMORY'])
@@ -304,7 +346,7 @@ class sendmessage(Callback):
 #==============================================================================
     def on_epoch_begin(self, epoch, logs=None):
         self.epoch.append(epoch)
-        itchat.send('Epoch'+str(epoch+1)+'/'+str(self.stopped_epoch)+' started', toUserName='filehelper')
+        self.t_send('Epoch'+str(epoch+1)+'/'+str(self.stopped_epoch)+' started', toUserName='filehelper')
         self.mesg = ('Epoch:'+str(epoch+1)+' ')
 #==============================================================================
 #         
@@ -314,12 +356,12 @@ class sendmessage(Callback):
             if k in logs:
                 self.mesg+=(k+': '+str(logs[k])[:5]+' ')
                 self.logs_epochs.setdefault(k, []).append(logs[k])
-        try:
-            itchat.send(self.mesg, toUserName='filehelper')
-        except:
-            itchat.auto_login(hotReload=True,enableCmdQR=True)
-            itchat.dump_login_status()
-            itchat.send(self.mesg, toUserName='filehelper')
+#==============================================================================
+#         except:
+#             itchat.auto_login(hotReload=True,enableCmdQR=True)
+#             itchat.dump_login_status()
+#             self.t_send(self.mesg, toUserName='filehelper')
+#==============================================================================
         if epoch+1>=self.stopped_epoch:
             self.model.stop_training = True
         logs = logs or {}
@@ -328,8 +370,17 @@ class sendmessage(Callback):
         sio.savemat('logs_epochs'+self.validateTitle(self.localtime)+'.mat',{'log':np.array(self.logs_epochs)})
         _thread.start_new_thread(self.get_fig,())
 #==============================================================================
+#         try:
+#             itchat.send(self.mesg, toUserName='filehelper')
+#         except:
+#             traceback.print_exc()
+#             return
+#==============================================================================
+        self.t_send(self.mesg, toUserName='filehelper')
+        return
+#==============================================================================
 #         
 #==============================================================================
     def on_train_end(self, logs=None):
-        itchat.send('Train stopped at epoch'+str(self.epoch[-1]+1), toUserName='filehelper')
+        self.t_send('Train stopped at epoch'+str(self.epoch[-1]+1), toUserName='filehelper')
         
