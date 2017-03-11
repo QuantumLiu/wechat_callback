@@ -30,7 +30,7 @@ matplotlib.use('Agg') #
 # Automaticly login when imported 
 #在被import时自动登录
 #==============================================================================
-itchat.auto_login(enableCmdQR=2,hotReload=True)
+itchat.auto_login(enableCmdQR=2,hotReload=True)#
 itchat.dump_login_status()#dump
 #==============================================================================
 # 
