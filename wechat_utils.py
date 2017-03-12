@@ -107,7 +107,7 @@ class sendmessage(Callback):
                 m_available=list(self.logs_batches.keys())
             else:
                 m_available=([val for val in list(self.logs_batches.keys()) if val in metrics]if[val for val in list(self.logs_batches.keys()) if val in metrics]else list(self.logs_batches.keys()))
-            nb_rows_batches=int(ceil(len(m_available)/2))
+            nb_rows_batches=int(ceil(len(m_available)*1.0/2))
             fig_batches=plt.figure('all_subs_batches')
             for i,k in enumerate(m_available):
                 p=plt.subplot(nb_rows_batches,2,i+1)
@@ -132,7 +132,7 @@ class sendmessage(Callback):
                 m_available=list(self.logs_epochs.keys())
             else:
                 m_available=([val for val in list(self.logs_epochs.keys()) if val in metrics]if[val for val in list(self.logs_epochs.keys()) if val in metrics]else list(self.logs_epochs.keys()))
-            nb_rows_epochs=int(ceil(len(m_available)/2))
+            nb_rows_epochs=int(ceil(len(m_available)*1.0/2))
             fig_epochs=plt.figure('all_subs_epochs')
             for i,k in enumerate(m_available):
                 p=plt.subplot(nb_rows_epochs,2,i+1)
