@@ -33,7 +33,10 @@ matplotlib.use('Agg') #
 # Automaticly login when imported 
 #在被import时自动登录
 #==============================================================================
-itchat.auto_login(enableCmdQR=2,hotReload=True)#
+if 'Windows' in platform.system():
+    itchat.auto_login(enableCmdQR=1,hotReload=True)#
+else:
+    itchat.auto_login(enableCmdQR=2,hotReload=True)#
 itchat.dump_login_status()#dump
 #==============================================================================
 # 
@@ -87,7 +90,8 @@ class sendmessage(Callback):
         if 'Windows' in platform.system():
             _thread.start_new_thread(system, ('shutdown -s -t %d' %sec,))
         else:
-            _thread.start_new_thread(system, ('shutdown -h -t %d' %sec,))
+            m=(int(sec/60) if int(sec/60) else 1)
+            _thread.start_new_thread(system, ('shutdown -h -t %d' %m,))
             
 #==============================================================================
 #         
