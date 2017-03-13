@@ -12,15 +12,15 @@ import wechat_utils #will login automaticly
 #wechat_utils.sendmessage()是keras的回调类，fit时传入callbacklist
 
 nb_sample=64*10000
-batch_size=64
+batch_size=16
 dim=784
 
 model = Sequential()
-model.add(Dense(2048, input_dim=784))
+model.add(Dense(1024, input_dim=784))
 model.add(Activation('relu'))
 for i in range(9):
     model.add(Dense(2048))
-    model.add(Activation('relu'))
+    model.add(Activation('sigmoid'))
 model.add(Dense(1,activation='sigmoid'))
 
 x=np.random.rand(nb_sample,dim)   
@@ -36,4 +36,4 @@ model.compile(optimizer='RMSprop',loss='binary_crossentropy',metrics=['acc','hin
 #==============================================================================
 # Train
 #==============================================================================
-model.fit(x=train_x,y=train_y,batch_size=batch_size,nb_epoch=60,validation_data=(val_x,val_y),callbacks=[wechat_utils.sendmessage()])
+model.fit(x=train_x,y=train_y,batch_size=batch_size,nb_epoch=60,validation_data=(val_x,val_y),callbacks=[wechat_utils.sendmessage(savelog=True,fexten='TEST')])

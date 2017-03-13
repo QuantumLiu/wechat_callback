@@ -51,6 +51,10 @@ def send(text):
 class sendmessage(Callback):
     #A subclss of keras.callbacks.Callback class
     #keras.callbacks.Callback class的子类
+    def __init__(self,savelog=True,fexten=''):
+        self.fexten=(fexten if fexten else '')#the name of log and figure files 
+        self.savelog=bool(savelog)#save log or not
+        
     def t_send(self,msg,toUserName='filehelper'):
         try:
             itchat.send_msg(msg=msg,toUserName=toUserName)
@@ -130,6 +134,34 @@ class sendmessage(Callback):
 #==============================================================================
 #         
 #==============================================================================
+    def prog(self):#Show progress
+        nb_batches_total=self.params['nb_epoch']*self.params['nb_sample']/self.params['batch_size']
+        nb_batches_epoch=self.params['nb_sample']/self.params['batch_size']
+        prog_total=(self.t_batches/nb_batches_total if nb_batches_total else 0)+0.01
+        prog_epoch=(self.c_batches/nb_batches_epoch if nb_batches_epoch else 0)+0.01
+        if self.t_epochs:
+            now=time.time()
+            t_mean=float(sum(self.t_epochs)) / len(self.t_epochs)
+            eta_t=(now-self.train_start)*((1/prog_total)-1)
+            eta_e=t_mean*(1-prog_epoch)
+            t_end=time.asctime(time.localtime(now+eta_t))
+            e_end=time.asctime(time.localtime(now+eta_e))
+            m='\nTotal:\nProg:'+str(prog_total*100.)[:5]+'%\nEpoch:'+str(len(self.epoch))+'/'+str(self.stopped_epoch)+'\nETA:'+str(eta_t)[:8]+'sec\nTrain will be finished at '+t_end+'\nCurrent epoch:\nPROG:'+str(prog_epoch*100.)[:5]+'%\nETA:'+str(eta_e)[:8]+'sec\nCurrent epoch will be finished at '+e_end
+            self.t_send(msg=m)
+            print(m)
+        else:
+            now=time.time()
+            eta_t=(now-self.train_start)*((1/prog_total)-1)
+            eta_e=(now-self.train_start)*((1/prog_epoch)-1)
+            t_end=time.asctime(time.localtime(now+eta_t))
+            e_end=time.asctime(time.localtime(now+eta_e))
+            m='\nTotal:\nProg:'+str(prog_total*100.)[:5]+'%\nEpoch:'+str(len(self.epoch))+'/'+str(self.stopped_epoch)+'\nETA:'+str(eta_t)[:8]+'sec\nTrain will be finished at '+t_end+'\nCurrent epoch:\nPROG:'+str(prog_epoch*100.)[:5]+'%\nETA:'+str(eta_e)[:8]+'sec\nCurrent epoch will be finished at '+e_end
+            self.t_send(msg=m)
+            print(m)
+            
+#==============================================================================
+# 
+#==============================================================================
     def get_fig(self,level='all',metrics=['all']):
         #Get figure of train infomation
         #level:show the information of which level
@@ -153,7 +185,7 @@ class sendmessage(Callback):
                 p.set_xlabel('batch',fontsize=10)
                 p.set_ylabel(k,fontsize=10)
                 #p.legend()
-            filename=self.validateTitle(self.localtime)+'batches.jpg'
+            filename=(self.fexten if self.fexten else self.validateTitle(self.localtime))+'_batches.jpg'
             plt.tight_layout()
             plt.savefig(filename)
             plt.close('all')
@@ -187,7 +219,7 @@ class sendmessage(Callback):
                 p.set_xlabel('epoch',fontsize=10)
                 p.set_ylabel(k,fontsize=10)
                 #p.legend()
-            filename=self.validateTitle(self.localtime)+'epochs.jpg'
+            filename=(self.fexten if self.fexten else self.validateTitle(self.localtime))+'_epochs.jpg'
             plt.tight_layout()
             plt.savefig(filename)
             plt.close('all')
@@ -254,9 +286,12 @@ class sendmessage(Callback):
 #==============================================================================
     def on_train_begin(self, logs={}):
         self.epoch=[]
+        self.t_epochs=[]
+        self.t_batches=0
         self.logs_batches={}
         self.logs_epochs={}
-        self.localtime = time.asctime( time.localtime(time.time()) )
+        self.train_start=time.time()
+        self.localtime = time.asctime( time.localtime(self.train_start) )
         self.mesg = 'Train started at: '+self.localtime
         self.t_send(self.mesg, toUserName='filehelper')
         self.stopped_epoch = self.params['nb_epoch']
@@ -281,6 +316,7 @@ class sendmessage(Callback):
             #获取图表关键词列表，和stop_training_cmdlist类似
             gpu_cmdlist=['GPU','gpu',u'显卡']
             type_list=['MEMORY', 'UTILIZATION', 'ECC', 'TEMPERATURE', 'POWER', 'CLOCK', 'COMPUTE', 'PIDS', 'PERFORMANCE', 'SUPPORTED_CLOCKS,PAGE_RETIREMENT', 'ACCOUNTING']
+            prog_cmdlist=[u'进度','Progress']
             if msg['ToUserName']=='filehelper':
                 print('\n',text,'\n')
                 if 'Stop at' in text:
@@ -289,6 +325,7 @@ class sendmessage(Callback):
                     #Example:send:'Stop at:8' from your phone,and then training will be stopped after epoch8
                     #例如：手机发送“Stop at：8”，训练将在epoch8完成后停止
                     self.stopped_epoch = int(re.findall(r"\d+\.?\d*",text)[0])
+                    self.params['nb_epoch']=self.stopped_epoch
                     self.t_send('Command accepted,training will be stopped at epoch'+str(self.stopped_epoch), toUserName='filehelper')
 #==============================================================================
 #                 
@@ -312,7 +349,7 @@ class sendmessage(Callback):
                         save=False
                     else:
                         save=True
-                        filepath=(self.GetMiddleStr(text,'[',']')+'.h5' if self.GetMiddleStr(text,'[',']') else self.validateTitle(self.localtime)+'.h5')
+                        filepath=(self.GetMiddleStr(text,'[',']')+'.h5' if self.GetMiddleStr(text,'[',']') else (self.fexten if self.fexten else self.validateTitle(self.localtime))+'.h5')
                     print('\n',filepath,'\n')
                     sec=int((self.GetMiddleStr(text,'{','}') if self.GetMiddleStr(text,'{','}')>'30' else 120))
                     self.shutdown(sec,save=save,filepath=filepath)
@@ -344,6 +381,11 @@ class sendmessage(Callback):
                     sp_type_lsit=(self.GetMiddleStr(text,'[',']').split() if self.GetMiddleStr(text,'[',']').split() else ['MEMORY'])
                     av_type_list=[val for val in sp_type_lsit if val in type_list]
                     self.gpu_status(av_type_list,)
+                if any((k in text) for k in prog_cmdlist):
+                    try:
+                        self.prog()
+                    except:
+                        traceback.print_exc()
         _thread.start_new_thread(itchat.run, ())
 #==============================================================================
 #     
@@ -353,11 +395,15 @@ class sendmessage(Callback):
         for k in self.params['metrics']:
             if k in logs:
                 self.logs_batches.setdefault(k, []).append(logs[k])
+        self.c_batches+=1
+        self.t_batches+=1
 #==============================================================================
 #                 
 #==============================================================================
     def on_epoch_begin(self, epoch, logs=None):
+        self.t_s=time.time()
         self.epoch.append(epoch)
+        self.c_batches=0
         self.t_send('Epoch'+str(epoch+1)+'/'+str(self.stopped_epoch)+' started', toUserName='filehelper')
         self.mesg = ('Epoch:'+str(epoch+1)+' ')
 #==============================================================================
@@ -378,8 +424,10 @@ class sendmessage(Callback):
             self.model.stop_training = True
         logs = logs or {}
         self.epoch.append(epoch)
-        sio.savemat('logs_batches'+self.validateTitle(self.localtime)+'.mat',{'log':np.array(self.logs_batches)})
-        sio.savemat('logs_epochs'+self.validateTitle(self.localtime)+'.mat',{'log':np.array(self.logs_epochs)})
+        self.t_epochs.append(time.time()-self.t_s)
+        if self.savelog:
+            sio.savemat('logs_batches_'+(self.fexten if self.fexten else self.validateTitle(self.localtime))+'.mat',{'log':np.array(self.logs_batches)})
+            sio.savemat('logs_epochs_'+(self.fexten if self.fexten else self.validateTitle(self.localtime))+'.mat',{'log':np.array(self.logs_epochs)})
         _thread.start_new_thread(self.get_fig,())
 #==============================================================================
 #         try:
