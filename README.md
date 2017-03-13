@@ -39,7 +39,7 @@ Stop now manualy
 立刻停止训练(当前epoch结束后)  
 <br /><br />
 New：Get gpu status<br />
-新增：获取GPU状态<br />
+新增：获取GPU状态<br /><br />新增：查询进度<br />
 ### Keywords/commands 关键词和命令
 stop_training_cmdlist=['Stop now',"That's enough",u'停止训练',u'放弃治疗']  
 
@@ -77,7 +77,7 @@ keywords:'Stop at + epoch'
 <br /><br />
 gpu_cmdlist=['GPU','gpu',u'显卡']<br />
 type_list=['MEMORY', 'UTILIZATION', 'ECC', 'TEMPERATURE', 'POWER', 'CLOCK', 'COMPUTE', 'PIDS', 'PERFORMANCE', 'SUPPORTED_CLOCKS,PAGE_RETIREMENT', 'ACCOUNTING']<br />显卡关键词
-  以及可查询状态列表<br /><br />
+  以及可查询状态列表<br /><br />prog_cmdlist=[u'进度','Progress']<br />查询进度，预告停止时间<br />Get progress，preview stop time
 ## Examples
 specify stop epoch  
 
