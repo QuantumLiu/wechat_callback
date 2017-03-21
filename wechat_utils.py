@@ -9,8 +9,9 @@ import scipy.io as sio
 import itchat
 from keras.callbacks import Callback
 import time
-import matplotlib.pyplot as plt
 import matplotlib  
+matplotlib.use('Agg') # 
+import matplotlib.pyplot as plt
 from math import ceil
 from itchat.content import TEXT
 import _thread
@@ -21,7 +22,6 @@ import traceback
 import socket  
 import platform
 from requests.exceptions import ConnectionError
-matplotlib.use('Agg') # 
 #==============================================================================
 # def login():
 #     itchat.auto_login(enableCmdQR=True)
@@ -146,7 +146,7 @@ class sendmessage(Callback):
             eta_e=t_mean*(1-prog_epoch)
             t_end=time.asctime(time.localtime(now+eta_t))
             e_end=time.asctime(time.localtime(now+eta_e))
-            m='\nTotal:\nProg:'+str(prog_total*100.)[:5]+'%\nEpoch:'+str(len(self.epoch))+'/'+str(self.stopped_epoch)+'\nETA:'+str(eta_t)[:8]+'sec\nTrain will be finished at '+t_end+'\nCurrent epoch:\nPROG:'+str(prog_epoch*100.)[:5]+'%\nETA:'+str(eta_e)[:8]+'sec\nCurrent epoch will be finished at '+e_end
+            m='\nTotal:\nProg:'+str(prog_total*100.)[:5]+'%\nEpoch:'+str(self.epoch[-1])+'/'+str(self.stopped_epoch)+'\nETA:'+str(eta_t)[:8]+'sec\nTrain will be finished at '+t_end+'\nCurrent epoch:\nPROG:'+str(prog_epoch*100.)[:5]+'%\nETA:'+str(eta_e)[:8]+'sec\nCurrent epoch will be finished at '+e_end
             self.t_send(msg=m)
             print(m)
         else:
