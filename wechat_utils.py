@@ -23,21 +23,16 @@ import socket
 import platform
 from requests.exceptions import ConnectionError
 #==============================================================================
-# def login():
-#     itchat.auto_login(enableCmdQR=True)
-#     itchat.run()
-#     itchat.dump_login_status()
-#     
 #==============================================================================
+# A log in function call it at first
+#函数，需要首先调用
 #==============================================================================
-# Automaticly login when imported 
-#在被import时自动登录
-#==============================================================================
-if 'Windows' in platform.system():
-    itchat.auto_login(enableCmdQR=1,hotReload=True)#
-else:
-    itchat.auto_login(enableCmdQR=2,hotReload=True)#
-itchat.dump_login_status()#dump
+def login():
+    if 'Windows' in platform.system():
+        itchat.auto_login(enableCmdQR=1,hotReload=True)#
+    else:
+        itchat.auto_login(enableCmdQR=2,hotReload=True)#
+    itchat.dump_login_status()#dump
 #==============================================================================
 # 
 #==============================================================================
