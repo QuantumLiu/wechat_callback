@@ -4,6 +4,10 @@ Created on Tue Mar  7 12:44:30 2017
 
 @author: Quantum Liu
 """
+from keras import __version__ as kv
+kv=int(kv[0])
+import platform
+pv=int(platform.python_version()[0])
 import numpy as np
 import scipy.io as sio
 import itchat
@@ -14,12 +18,14 @@ matplotlib.use('Agg') #
 import matplotlib.pyplot as plt
 from math import ceil
 from itchat.content import TEXT
-import _thread
+if pv>2:
+    import _thread as th
+else:
+    import thread as th
 import os
 from os import system
 import re
 import traceback
-import socket  
 import platform
 from requests.exceptions import ConnectionError
 #==============================================================================
@@ -107,10 +113,10 @@ class sendmessage(Callback):
         else:
             self.t_send('Command accepted,shutting down the computer....', toUserName='filehelper')
         if 'Windows' in platform.system():
-            _thread.start_new_thread(system, ('shutdown -s -t %d' %sec,))
+            th.start_new_thread(system, ('shutdown -s -t %d' %sec,))
         else:
             m=(int(sec/60) if int(sec/60) else 1)
-            _thread.start_new_thread(system, ('shutdown -h -t %d' %m,))
+            th.start_new_thread(system, ('shutdown -h -t %d' %m,))
             
 #==============================================================================
 #         
@@ -120,9 +126,9 @@ class sendmessage(Callback):
         #取消关机函数
         self.t_send('Command accepted,cancel shutting down the computer....', toUserName='filehelper')
         if 'Windows' in platform.system():
-            _thread.start_new_thread(system, ('shutdown -a',))
+            th.start_new_thread(system, ('shutdown -a',))
         else:
-            _thread.start_new_thread(system, ('shutdown -c',))
+            th.start_new_thread(system, ('shutdown -c',))
 #==============================================================================
 #         
 #==============================================================================
@@ -150,7 +156,7 @@ class sendmessage(Callback):
 #         
 #==============================================================================
     def prog(self):#Show progress
-        nb_batches_total=self.params['nb_epoch']*self.params['nb_sample']/self.params['batch_size']
+        nb_batches_total=(self.params['nb_epoch'] if not kv-1 else self.params['epochs'])*self.params['nb_sample']/self.params['batch_size']
         nb_batches_epoch=self.params['nb_sample']/self.params['batch_size']
         prog_total=(self.t_batches/nb_batches_total if nb_batches_total else 0)+0.01
         prog_epoch=(self.c_batches/nb_batches_epoch if nb_batches_epoch else 0)+0.01
@@ -233,7 +239,6 @@ class sendmessage(Callback):
                 p.set_title(k+' in epochs',fontsize=14)
                 p.set_xlabel('epoch',fontsize=10)
                 p.set_ylabel(k,fontsize=10)
-                #p.legend()
             filename=(self.fexten if self.fexten else self.validateTitle(self.localtime))+'_epochs.jpg'
             plt.tight_layout()
             plt.savefig(filename)
@@ -259,25 +264,25 @@ class sendmessage(Callback):
             if level=='all':
                 batches(metrics=metrics)
                 epochs(metrics=metrics)
-                _thread.exit()
+                th.exit()
                 return
             elif level=='epochs':
                 epochs(metrics=metrics)
-                _thread.exit()
+                th.exit()
                 return
             elif level=='batches':
                 batches(metrics=metrics)
-                _thread.exit()
+                th.exit()
                 return
             else:
                 batches(metrics=metrics)
                 epochs(metrics=metrics)
-                _thread.exit()
+                th.exit()
                 return
         except Exception:
             traceback.print_exc()
             self.t_send('Failed to send figure',toUserName='filehelper')
-            _thread.exit()
+            th.exit()
             return
 #==============================================================================
 #             
@@ -295,7 +300,7 @@ class sendmessage(Callback):
             s=content[index:].replace(' ','').rstrip('\n')
             self.t_send(s, toUserName='filehelper')
             time.sleep(.5)
-        #_thread.exit()
+        #th.exit()
 #==============================================================================
 # 
 #==============================================================================
@@ -309,7 +314,7 @@ class sendmessage(Callback):
         self.localtime = time.asctime( time.localtime(self.train_start) )
         self.mesg = 'Train started at: '+self.localtime
         self.t_send(self.mesg, toUserName='filehelper')
-        self.stopped_epoch = self.params['nb_epoch']
+        self.stopped_epoch = (self.params['epochs'] if kv-1 else self.params['nb_epoch'])
         @itchat.msg_register(TEXT)
 #==============================================================================
 #         registe methods to reply msgs,similar to main()
@@ -340,7 +345,10 @@ class sendmessage(Callback):
                     #Example:send:'Stop at:8' from your phone,and then training will be stopped after epoch8
                     #例如：手机发送“Stop at：8”，训练将在epoch8完成后停止
                     self.stopped_epoch = int(re.findall(r"\d+\.?\d*",text)[0])
-                    self.params['nb_epoch']=self.stopped_epoch
+                    if kv-1:
+                        self.params['epochs']=self.stopped_epoch
+                    else:
+                        self.params['nb_epoch']=self.stopped_epoch
                     self.t_send('Command accepted,training will be stopped at epoch'+str(self.stopped_epoch), toUserName='filehelper')
 #==============================================================================
 #                 
@@ -387,11 +395,11 @@ class sendmessage(Callback):
                     metrics=(self.GetMiddleStr(text,'[',']').split() if self.GetMiddleStr(text,'[',']').split() else ['all'])
                     level=(self.GetMiddleStr(text,'{','}') if self.GetMiddleStr(text,'{','}') else 'all' )
                     if level in ['all','epochs','batches']:
-                        _thread.start_new_thread(self.get_fig,(level,metrics))
+                        th.start_new_thread(self.get_fig,(level,metrics))
                     else:
                         print("\nGot no level,using default 'all'\n")
                         self.t_send("Got no level,using default 'all'", toUserName='filehelper')
-                        _thread.start_new_thread(self.get_fig,())
+                        th.start_new_thread(self.get_fig,())
                 if any((k in text) for k in gpu_cmdlist):
                     sp_type_lsit=(self.GetMiddleStr(text,'[',']').split() if self.GetMiddleStr(text,'[',']').split() else ['MEMORY'])
                     av_type_list=[val for val in sp_type_lsit if val in type_list]
@@ -401,7 +409,7 @@ class sendmessage(Callback):
                         self.prog()
                     except:
                         traceback.print_exc()
-        _thread.start_new_thread(itchat.run, ())
+        th.start_new_thread(itchat.run, ())
 #==============================================================================
 #     
 #==============================================================================
@@ -443,7 +451,7 @@ class sendmessage(Callback):
         if self.savelog:
             sio.savemat((self.fexten if self.fexten else self.validateTitle(self.localtime))+'_logs_batches'+'.mat',{'log':np.array(self.logs_batches)})
             sio.savemat((self.fexten if self.fexten else self.validateTitle(self.localtime))+'_logs_batches'+'.mat',{'log':np.array(self.logs_epochs)})
-        _thread.start_new_thread(self.get_fig,())
+        th.start_new_thread(self.get_fig,())
 #==============================================================================
 #         try:
 #             itchat.send(self.mesg, toUserName='filehelper')
